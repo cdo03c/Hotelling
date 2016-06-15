@@ -34,9 +34,11 @@ hotelling.stat = function(x, y, shrinkage = FALSE)
 
     T2 = t(mx - my) %*% sPooledInv %*% (mx - my)*nx*ny/(nx + ny)
     m = (nx + ny - p - 1)/(p*(nx + ny - 2))
+    f = (nx + ny - p - 1)*T2/p/(nx+ny-2)
+    pval = 1-pf(f, p, nx + ny - p - 1)
 
-    invisible(list(statistic = as.vector(T2), m = m, df = c(p, nx + ny - p - 1),
-                   nx = nx, ny = ny, p = p))
+    list(statistic = as.vector(T2), m = m, f = f, df = c(p, nx + ny - p - 1),
+         nx = nx, ny = ny, p = p, pval = pval)
 }
 
 hotelling.test = function(x, ...){
@@ -62,7 +64,7 @@ hotelling.test.default = function(x, y, shrinkage = FALSE, perm = FALSE,
 
         idx = 1:N
         X = rbind(x, y)
-        
+
         onePercent = floor(B / 100)
         pb = NULL
         if(progBar){
@@ -119,7 +121,7 @@ plot.hotelling.test = function(x,...){
         stop("Plotting only works if you have used the permutation test")
 
     dotArgNames = names(list(...))
-    
+
     if("xlim" %in% dotArgNames){
       with(x,{
          h = hist(stats$m*results, main = "Distribution of permuted test stats",
